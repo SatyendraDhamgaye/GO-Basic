@@ -8,4 +8,5 @@ func main() {
 	fmt.Println("enter a value")
 	fmt.Scanln(&a)
 	println("output", a)
+	println("success")
 }
