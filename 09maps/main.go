@@ -16,4 +16,11 @@ func main() {
 
 	delete(languages, "py")
 	fmt.Println("After deleteing Python from the languages map: ", languages)
+
+	//to check if the value is present in hash map or not
+	//where value is value
+	//ok return bool value i.e. true or false
+	value, ok := languages["js"]
+	fmt.Println(ok, value)
+
 }
