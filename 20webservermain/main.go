@@ -93,3 +93,8 @@ func main() {
 		fmt.Println("Error:", err)
 	}
 }
+
+//http://localhost:8080/postform
+//http://localhost:8080/post
+//http://localhost:8080/get
+//http://localhost:8080
