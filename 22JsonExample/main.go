@@ -29,10 +29,38 @@ func EncodeJson() {
 
 func main() {
 	EncodeJson()
+
+	DecodeJson()
 }
 
 func catchError(err error) {
 	if err != nil {
 		panic(err)
+	}
+}
+
+func DecodeJson() {
+	jsonDataFromWeb := []byte(`
+		{
+			"shopName": "Dev1",
+			"ownerName": "Saty",
+			"Rating": 4,
+			"tags": ["graphic-card", "ram"]
+	}
+	`)
+
+	var marketfromweb shop
+
+	checkJson := json.Valid(jsonDataFromWeb)
+	if checkJson {
+		fmt.Println("JSON is Valide")
+		json.Unmarshal(jsonDataFromWeb, &marketfromweb)
+		fmt.Printf("%#v\n", marketfromweb)
+	}
+
+	var jsoninmap map[string]interface{}
+	json.Unmarshal(jsonDataFromWeb, &jsoninmap)
+	for k, v := range jsoninmap {
+		fmt.Printf("Key is %v and Value is %v\n", k, v)
 	}
 }
