@@ -3,7 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -13,6 +16,8 @@ type Shop struct {
 	Item_Price  int          `json:"itemprice"`
 	Item_Desc   string       `json:"itemdescription"`
 	Manufaturer *Manufaturer `json:"itemmanufaturer"`
+	Shop_Name   string       `json:"shopname"`
+	Shop_Id     string       `json:"shopid"`
 }
 
 type Manufaturer struct {
@@ -23,7 +28,7 @@ type Manufaturer struct {
 var shop []Shop
 
 func (s *Shop) IsEmpty() bool {
-	return s.Item_Name == "" && s.Item_Desc == ""
+	return s.Item_Name == ""
 }
 
 func main() {
@@ -47,12 +52,38 @@ func getOneShopData(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
 	for _, course := range shop {
-		if course.Item_Name == params["name"] {
+		if course.Shop_Name == params["sname"] {
 			json.NewEncoder(w).Encode(shop)
 			return
 		}
 	}
 	json.NewEncoder(w).Encode("No data found, please enter correct data")
+	return
+}
+
+func createOneShop(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Creating one Shop")
+	w.Header().Set("Content-Type", "applciation/json")
+
+	//if body is empty
+
+	if r.Body == nil {
+		json.NewEncoder(w).Encode("Body is empty, send some data")
+	}
+
+	//if json data is {}
+	var shops Shop
+	_ = json.NewDecoder(r.Body).Decode(&shop)
+	if shops.IsEmpty() {
+		json.NewEncoder(w).Encode("json is empty, send some data")
+		return
+	}
+
+	//creating random unique shopID integer
+	rand.Seed(time.Now().Unix())
+	shops.Shop_Id = strconv.Itoa(rand.Intn(99))
+	shops = append(shops, shop)
+	json.NewEncoder(w).Encode("data is given")
 	return
 }
 
