@@ -9,82 +9,136 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"sort.com/goserver/go/pkg/mod/github.com/gorilla/mux@v1.8.1"
 )
 
-type Shop struct {
-	Item_Name   string       `json:"itemname"`
-	Item_Price  int          `json:"itemprice"`
-	Item_Desc   string       `json:"itemdescription"`
-	Manufaturer *Manufaturer `json:"itemmanufaturer"`
-	Shop_Name   string       `json:"shopname"`
-	Shop_Id     string       `json:"shopid"`
+// Model for course - file
+type Course struct {
+	CourseId    string  `json:"courseid"`
+	CourseName  string  `json:"coursename"`
+	CoursePrice int     `json:"price"`
+	Author      *Author `json:"author"`
 }
 
-type Manufaturer struct {
-	CompanyName string `json:"companyname"`
-	website     string
+type Author struct {
+	Fullname string `json:"fullname"`
+	Website  string `json:"website"`
 }
 
-var shop []Shop
+// fake DB
+var courses []Course
 
-func (s *Shop) IsEmpty() bool {
-	return s.Item_Name == ""
+// middleware, helper - file
+func (c *Course) IsEmpty() bool {
+	// return c.CourseId == "" && c.CourseName == ""
+	return c.CourseName == ""
 }
 
 func main() {
 
 }
 
-// controller starts
-func serverHome(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("<h1>Hi this is API Building first page with nothing after '/' :)</h1>"))
+//controllers - file
+
+// serve home route
+
+func serveHome(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("<h1>Welcome to API by LearnCodeOnline</h1>"))
 }
 
-func getShopDetails(w http.ResponseWriter, r http.Request) {
-	fmt.Println("Getting all the data from shop Database")
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(shop)
+func getAllCourses(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Get all courses")
+	w.Header().Set("Content-Type", "applicatioan/json")
+	json.NewEncoder(w).Encode(courses)
 }
 
-func getOneShopData(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Getting values from shop")
-	w.Header().Set("Content-Type", "application/json")
+func getOneCourse(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Get one course")
+	w.Header().Set("Content-Type", "applicatioan/json")
+
+	// grab id from request
 	params := mux.Vars(r)
 
-	for _, course := range shop {
-		if course.Shop_Name == params["sname"] {
-			json.NewEncoder(w).Encode(shop)
+	// loop through courses, find matching id and return the response
+	for _, course := range courses {
+		if course.CourseId == params["id"] {
+			json.NewEncoder(w).Encode(course)
 			return
 		}
 	}
-	json.NewEncoder(w).Encode("No data found, please enter correct data")
+	json.NewEncoder(w).Encode("No Course found with given id")
 	return
 }
 
-func createOneShop(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Creating one Shop")
-	w.Header().Set("Content-Type", "applciation/json")
+func createOneCourse(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Create one course")
+	w.Header().Set("Content-Type", "applicatioan/json")
 
-	//if body is empty
-
+	// what if: body is empty
 	if r.Body == nil {
-		json.NewEncoder(w).Encode("Body is empty, send some data")
+		json.NewEncoder(w).Encode("Please send some data")
 	}
 
-	//if json data is {}
-	var shops Shop
-	_ = json.NewDecoder(r.Body).Decode(&shop)
-	if shops.IsEmpty() {
-		json.NewEncoder(w).Encode("json is empty, send some data")
+	// what about - {}
+
+	var course Course
+	_ = json.NewDecoder(r.Body).Decode(&course)
+	if course.IsEmpty() {
+		json.NewEncoder(w).Encode("No data inside JSON")
 		return
 	}
 
-	//creating random unique shopID integer
+	//TODO: check only if title is duplicate
+	// loop, title matches with course.coursename, JSON
+
+	params := mux.Vars(r)
+
+	// loop through courses, find matching id and return the response
+	for _, title := range courses {
+		count := 0
+		if title.CourseName == params["title"] {
+			count++
+			if count > 1 {
+				json.NewEncoder(w).Encode("There are more than one entities present in the database with give Course Name")
+				return
+			}
+			json.NewEncoder(w).Encode(course)
+			return
+		}
+	}
+
+	// generate unique id, string
+	// append course into courses
+
 	rand.Seed(time.Now().Unix())
-	shops.Shop_Id = strconv.Itoa(rand.Intn(99))
-	shops = append(shops, shop)
-	json.NewEncoder(w).Encode("data is given")
+	course.CourseId = strconv.Itoa(rand.Intn(100))
+	courses = append(courses, course)
+	json.NewEncoder(w).Encode(course)
 	return
+
 }
 
-//controller ends
+func updateOneCourse(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Updatiing id")
+	w.Header().Set("Content-Type", "applciation/json")
+
+	params := mux.Vars(r)
+
+	for index, course := range courses {
+
+		if course.CourseId != params["id"] {
+			json.NewEncoder(w).Encode("Given Id is not present in the database")
+			return
+		}
+
+		if course.CourseId == params["id"] {
+			courses = append(courses[:index], courses[index+1:]...)
+			var course Course
+			json.NewDecoder(r.Body).Decode(&course)
+			course.CourseId == params["id"]
+			courses = append(courses, course)
+			json.NewEncoder(w).Encode(course)
+			return
+		}
+	}
+}
