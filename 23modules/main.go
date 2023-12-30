@@ -21,6 +21,6 @@ func greater() {
 }
 
 func serverBase(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("<h1>USing Gorrilaa mod </h1>"))
+	w.Write([]byte("<h1>USing Gorrilaa mod in webpage </h1>"))
 
 }

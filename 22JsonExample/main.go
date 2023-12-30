@@ -29,7 +29,6 @@ func EncodeJson() {
 
 func main() {
 	EncodeJson()
-
 	DecodeJson()
 }
 
