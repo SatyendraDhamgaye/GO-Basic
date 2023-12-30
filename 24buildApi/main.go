@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"sort.com/goserver/go/pkg/mod/github.com/gorilla/mux@v1.8.1"
 )
 
 // Model for course - file
@@ -141,4 +140,26 @@ func updateOneCourse(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+}
+
+func deleteOneCourse(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Deleting data")
+	w.Header().Set("Content-Type", "application/json")
+
+	params := mux.Vars(r)
+
+	for index, course := range courses {
+
+		if course.CourseId != params["id"] {
+			json.NewEncoder(w).Encode("Given Id is not present in the database")
+			return
+		}
+
+		if course.CourseId == params["id"] {
+			courses = append(courses[:index], courses[index+1:]...)
+			json.NewEncoder(w).Encode("Data deleted sucessfully")
+			break
+		}
+	}
+
 }
