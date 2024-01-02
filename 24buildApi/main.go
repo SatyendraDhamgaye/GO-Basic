@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -34,7 +35,23 @@ func (c *Course) IsEmpty() bool {
 }
 
 func main() {
+	fmt.Println("API - LearnCodeOnline.in")
+	r := mux.NewRouter()
 
+	//seeding
+	courses = append(courses, Course{CourseId: "2", CourseName: "ReactJS", CoursePrice: 299, Author: &Author{Fullname: "Hitesh Choudhary", Website: "lco.dev"}})
+	courses = append(courses, Course{CourseId: "4", CourseName: "MERN Stack", CoursePrice: 199, Author: &Author{Fullname: "Hitesh Choudhary", Website: "go.dev"}})
+
+	//routing
+	r.HandleFunc("/", serveHome).Methods("GET")
+	r.HandleFunc("/courses", getAllCourses).Methods("GET")
+	r.HandleFunc("/course/{id}", getOneCourse).Methods("GET")
+	r.HandleFunc("/course", createOneCourse).Methods("POST")
+	r.HandleFunc("/course/{id}", updateOneCourse).Methods("PUT")
+	r.HandleFunc("/course/{id}", deleteOneCourse).Methods("DELETE")
+
+	// listen to a port
+	log.Fatal(http.ListenAndServe(":4000", r))
 }
 
 //controllers - file
@@ -90,26 +107,10 @@ func createOneCourse(w http.ResponseWriter, r *http.Request) {
 	//TODO: check only if title is duplicate
 	// loop, title matches with course.coursename, JSON
 
-	params := mux.Vars(r)
-
-	// loop through courses, find matching id and return the response
-	for _, title := range courses {
-		count := 0
-		if title.CourseName == params["title"] {
-			count++
-			if count > 1 {
-				json.NewEncoder(w).Encode("There are more than one entities present in the database with give Course Name")
-				return
-			}
-			json.NewEncoder(w).Encode(course)
-			return
-		}
-	}
-
 	// generate unique id, string
 	// append course into courses
 
-	rand.Seed(time.Now().Unix())
+	rand.Seed(time.Now().UnixNano())
 	course.CourseId = strconv.Itoa(rand.Intn(100))
 	courses = append(courses, course)
 	json.NewEncoder(w).Encode(course)
@@ -118,48 +119,41 @@ func createOneCourse(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateOneCourse(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Updatiing id")
-	w.Header().Set("Content-Type", "applciation/json")
+	fmt.Println("Update one course")
+	w.Header().Set("Content-Type", "applicatioan/json")
 
+	// first - grab id from req
 	params := mux.Vars(r)
 
+	// loop, id, remove, add with my ID
+
 	for index, course := range courses {
-
-		if course.CourseId != params["id"] {
-			json.NewEncoder(w).Encode("Given Id is not present in the database")
-			return
-		}
-
 		if course.CourseId == params["id"] {
 			courses = append(courses[:index], courses[index+1:]...)
 			var course Course
-			json.NewDecoder(r.Body).Decode(&course)
-			course.CourseId == params["id"]
+			_ = json.NewDecoder(r.Body).Decode(&course)
+			course.CourseId = params["id"]
 			courses = append(courses, course)
 			json.NewEncoder(w).Encode(course)
 			return
 		}
 	}
+	//TODO: send a response when id is not found
 }
 
 func deleteOneCourse(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Deleting data")
-	w.Header().Set("Content-Type", "application/json")
+	fmt.Println("Delete one course")
+	w.Header().Set("Content-Type", "applicatioan/json")
 
 	params := mux.Vars(r)
 
+	//loop, id, remove (index, index+1)
+
 	for index, course := range courses {
-
-		if course.CourseId != params["id"] {
-			json.NewEncoder(w).Encode("Given Id is not present in the database")
-			return
-		}
-
 		if course.CourseId == params["id"] {
 			courses = append(courses[:index], courses[index+1:]...)
-			json.NewEncoder(w).Encode("Data deleted sucessfully")
+			// TODO: send a confirm or deny response
 			break
 		}
 	}
-
 }
