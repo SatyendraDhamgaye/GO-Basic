@@ -1,0 +1,7 @@
+MongoDb Atlas
+
+UserName: satye
+
+Password: Lavra
+
+DB String: mongodb+srv://satye:<password>@golangprac.3cu4y7i.mongodb.net/?retryWrites=true&w=majority
