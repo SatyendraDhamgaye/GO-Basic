@@ -2,6 +2,8 @@ package controller
 
 import (
 	"context"
+	"fmt"
+	"log"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -24,5 +26,18 @@ func init() {
 	clientOption := options.Client().ApplyURI(connectionString)
 
 	//connect to mongoDb
-	mongo.Connect(context.TODO(), clientOption)
+	//background works in background anutomatically on repeat
+	//TODO works in foreground
+	client, err := mongo.Connect(context.TODO(), clientOption)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("MongoDB connection success")
+
+	collection = client.Database(dbname).Collection(colName)
+
+	//collection instance
+	fmt.Println("Collection instance is ready")
 }
