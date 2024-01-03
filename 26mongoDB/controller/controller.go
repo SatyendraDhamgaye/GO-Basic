@@ -79,3 +79,19 @@ func deleteAllMovie(movieId string) {
 	fmt.Println("Number of movies deleted: ", deleteResult.DeletedCount)
 
 }
+
+func getAllMovies() []primitive.M {
+	cur, err := collection.Find(context.Background(), bson.D{{}})
+	helpers.ErrorCatcher(err)
+
+	var movies []primitive.M
+
+	for cur.Next(context.Background()) {
+		var movie bson.M
+		err := cur.Decode(&movie)
+		helpers.ErrorCatcher(err)
+		movies = append(movies, movie)
+	}
+	defer cur.Close(context.Background())
+	return movies
+}
