@@ -1,7 +1,17 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"log"
+	"net/http"
+
+	"github.com/SatyendraDhamgaye/mongoDbApi/router"
+)
 
 func main() {
 	fmt.Println("mongoDB")
+	r := router.Router()
+	fmt.Println("Server is getting started...")
+	log.Fatal(http.ListenAndServe(":8000", r))
+
 }
