@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/SatyendraDhamgaye/mongoDbApi/helpers"
@@ -13,7 +14,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/x/mongo/driver/mongocrypt/options"
 )
 
 // connection string from created database from mongodb
@@ -59,7 +59,7 @@ func updateOneMovie(movieId string) {
 	id, err := primitive.ObjectIDFromHex(movieId)
 	helpers.ErrorCatcher(err)
 	filter := bson.M{"_id": id}
-	update := bson.M{"$set": bson.M{"watcher": true}}
+	update := bson.M{"$set": bson.M{"watched": true}}
 
 	result, err := collection.UpdateOne(context.Background(), filter, update)
 	helpers.ErrorCatcher(err)
@@ -76,11 +76,13 @@ func deleteOneMovie(movieId string) {
 	fmt.Println("Movie got deleted with delete count: ", deletecount)
 }
 
-func deleteAllMovie(movieId string) {
-	deleteResult, err := collection.DeleteMany(context.Background(), bson.D{{}})
-	helpers.ErrorCatcher(err)
-	fmt.Println("Number of movies deleted: ", deleteResult.DeletedCount)
-
+func deleteAllMovie() int64 {
+	deleteResult, err := collection.DeleteMany(context.Background(), bson.D{{}}, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("NUmber of movies delete: ", deleteResult.DeletedCount)
+	return deleteResult.DeletedCount
 }
 
 func getAllMovies() []primitive.M {
@@ -139,6 +141,6 @@ func DeleteAllMovies(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-www-form-urlencode")
 	w.Header().Set("Allow-Control-Allow-Methods", "PUT")
 
-	deleteAllMovie()
-	json.NewEncoder(w).Encode(params["id"])
+	count := deleteAllMovie()
+	json.NewEncoder(w).Encode(count)
 }
