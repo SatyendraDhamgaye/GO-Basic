@@ -1,0 +1,2 @@
+Do not communicate by sharing memory;
+Insted share memory by communicating.
